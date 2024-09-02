@@ -1,0 +1,74 @@
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e0e0e0;
+  padding: 1rem;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.files-container {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.files-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-item:hover {
+  background-color: #f0f0f0;
+}
+
+.file-icon {
+  margin-right: 1rem;
+  width: 24px;
+  height: 24px;
+}
+
+.file-details {
+  flex-grow: 1;
+}
+
+.file-name {
+  margin: 0;
+  font-weight: 500;
+}
+
+.file-info {
+  font-size: 0.875rem;
+  color: #666;
+}
