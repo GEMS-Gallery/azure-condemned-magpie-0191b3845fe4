@@ -6,13 +6,15 @@ type Result =
 type File = 
  record {
    category: text;
+   content: blob;
    fileType: text;
    id: nat;
    name: text;
-   size: opt text;
+   size: nat;
  };
 service : {
-  addFile: (text, text, opt text, text) -> (Result);
+  addFile: (text, text, nat, text, blob) -> (Result);
+  getFileContent: (nat) -> (opt blob) query;
   getFiles: () -> (vec File) query;
   getFilesByCategory: (text) -> (vec File) query;
 }

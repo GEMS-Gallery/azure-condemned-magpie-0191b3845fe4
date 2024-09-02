@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Button, TextField, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Container, Typography, Button, TextField, CircularProgress, IconButton } from '@mui/material';
 import { styled } from '@mui/system';
-import { UploadFile, Search, Folder, InsertDriveFile, Image, VideoFile, AudioFile, Archive } from '@mui/icons-material';
+import { UploadFile, Search, Folder, InsertDriveFile, Image, VideoFile, AudioFile, Archive, Download } from '@mui/icons-material';
 import { backend } from 'declarations/backend';
 
 const Sidebar = styled(Box)(({ theme }) => ({
@@ -39,7 +39,7 @@ interface File {
   id: number;
   name: string;
   fileType: string;
-  size: string | null;
+  size: number;
   category: string;
 }
 
@@ -63,6 +63,7 @@ const getFileIcon = (fileType: string) => {
 function App() {
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchFiles();
@@ -79,24 +80,49 @@ function App() {
     }
   };
 
-  const handleUpload = async () => {
-    // Simulating file upload for MVP
-    const newFile = {
-      name: `File ${files.length + 1}`,
-      fileType: 'document',
-      size: '1 MB',
-      category: 'My Files',
-    };
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const content = e.target?.result as ArrayBuffer;
+      try {
+        const result = await backend.addFile(
+          file.name,
+          file.type,
+          file.size,
+          'My Files',
+          new Uint8Array(content)
+        );
+        if ('ok' in result) {
+          await fetchFiles();
+        } else {
+          console.error('Error adding file:', result.err);
+        }
+      } catch (error) {
+        console.error('Error adding file:', error);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleDownload = async (fileId: number, fileName: string) => {
     try {
-      const result = await backend.addFile(newFile.name, newFile.fileType, newFile.size, newFile.category);
-      if ('ok' in result) {
-        await fetchFiles();
-      } else {
-        console.error('Error adding file:', result.err);
+      const content = await backend.getFileContent(fileId);
+      if (content) {
+        const blob = new Blob([content]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error adding file:', error);
+      console.error('Error downloading file:', error);
     }
   };
 
@@ -133,7 +159,17 @@ function App() {
           <Container>
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Typography variant="h5">FileBox</Typography>
-              <Button variant="contained" startIcon={<UploadFile />} onClick={handleUpload}>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleUpload}
+              />
+              <Button
+                variant="contained"
+                startIcon={<UploadFile />}
+                onClick={() => fileInputRef.current?.click()}
+              >
                 Upload
               </Button>
             </Box>
@@ -160,12 +196,15 @@ function App() {
               files.map((file) => (
                 <FileItem key={file.id}>
                   {getFileIcon(file.fileType)}
-                  <Box ml={2}>
+                  <Box ml={2} flexGrow={1}>
                     <Typography variant="subtitle1">{file.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {file.size || 'N/A'}
+                      {`${(file.size / 1024).toFixed(2)} KB`}
                     </Typography>
                   </Box>
+                  <IconButton onClick={() => handleDownload(file.id, file.name)}>
+                    <Download />
+                  </IconButton>
                 </FileItem>
               ))
             )}
