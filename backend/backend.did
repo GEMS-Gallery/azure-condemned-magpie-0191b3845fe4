@@ -1,20 +1,4 @@
-type Result = 
- variant {
-   err: text;
-   ok: nat;
- };
-type File = 
- record {
-   category: text;
-   content: blob;
-   fileType: text;
-   id: nat;
-   name: text;
-   size: nat;
- };
 service : {
-  addFile: (text, text, nat, text, blob) -> (Result);
-  getFileContent: (nat) -> (opt blob) query;
-  getFiles: () -> (vec File) query;
-  getFilesByCategory: (text) -> (vec File) query;
+  getValue: () -> (text) query;
+  setValue: (text) -> ();
 }
