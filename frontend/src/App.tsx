@@ -36,10 +36,10 @@ const FileItem = styled(Box)(({ theme }) => ({
 }));
 
 interface File {
-  id: number;
+  id: bigint;
   name: string;
   fileType: string;
-  size: number;
+  size: bigint;
   category: string;
 }
 
@@ -91,7 +91,7 @@ function App() {
         const result = await backend.addFile(
           file.name,
           file.type,
-          file.size,
+          BigInt(file.size),
           'My Files',
           new Uint8Array(content)
         );
@@ -107,7 +107,7 @@ function App() {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleDownload = async (fileId: number, fileName: string) => {
+  const handleDownload = async (fileId: bigint, fileName: string) => {
     try {
       const content = await backend.getFileContent(fileId);
       if (content) {
@@ -194,12 +194,12 @@ function App() {
               </Box>
             ) : (
               files.map((file) => (
-                <FileItem key={file.id}>
+                <FileItem key={Number(file.id)}>
                   {getFileIcon(file.fileType)}
                   <Box ml={2} flexGrow={1}>
                     <Typography variant="subtitle1">{file.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {`${(file.size / 1024).toFixed(2)} KB`}
+                      {`${(Number(file.size) / 1024).toFixed(2)} KB`}
                     </Typography>
                   </Box>
                   <IconButton onClick={() => handleDownload(file.id, file.name)}>
